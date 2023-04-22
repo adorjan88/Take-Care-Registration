@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Take Care!</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="create_a_new_account">Create a new account</string>
+    <string name="take_care">Take Care!</string>
+    <string name="e_mail_address">E-mail address</string>
+    <string name="instructionsPassword">Your Password should contain:\n-8-16 characters\n-At least one capital letter\n-At least one number</string>
+    <string name="caregiver">Caregiver</string>
+    <string name="patient">Patient</string>
+</resources>
