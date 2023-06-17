@@ -2,6 +2,7 @@ package com.example.takecare;
 
 import static android.content.ContentValues.TAG;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -12,18 +13,37 @@ import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+
 import java.util.regex.Pattern;
 
+import Classes.User;
 import Exceptions.RegexPatternException;
 
 public class RegistrationActivity extends AppCompatActivity {
+
+    public void storeUser(FirebaseFirestore db, User user){
+        db.collection("users")
+                .add(user)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d(TAG, "User added to Firestore");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error adding user to Firestore", e);
+                    }
+                });
+    }
 
     private static final Pattern passwordRegex = Pattern.compile("^(?=.*[A-Z])(?=.*[0-9]).{8,16}$");
 
@@ -38,6 +58,8 @@ public class RegistrationActivity extends AppCompatActivity {
 
         RadioButton setPatient = findViewById(R.id.patientButton);
         RadioButton setCaregiver = findViewById(R.id.caregiverButton);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
         //user must be either patient or caregiver
@@ -68,6 +90,14 @@ public class RegistrationActivity extends AppCompatActivity {
                                     FirebaseUser firebaseUser1 = firebaseUser.getCurrentUser();
                                     if (firebaseUser1 != null){
                                         firebaseUser1.sendEmailVerification();
+                                        if(setCaregiver.isChecked()){
+                                            User user = new User(emailAddress.getText().toString(),"Caregiver");
+                                            storeUser(db, user);
+                                        }
+                                        else{
+                                            User user = new User(emailAddress.getText().toString(),"Patient");
+                                            storeUser(db, user);
+                                        }
                                     }
 
                                     Toast.makeText(v.getContext(), "Registration was successful!", Toast.LENGTH_SHORT).show();
